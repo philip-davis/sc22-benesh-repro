@@ -1,4 +1,4 @@
-FROM code.ornl.gov:4567/olcfcontainers/olcfbaseimages/mpiimage-centos-cuda as bootstrap
+FROM mpibase as bootstrap
 
 ENV SPACK_ROOT=/opt/spack \
     CURRENTLY_BUILDING_DOCKER_IMAGE=1 \
@@ -33,7 +33,7 @@ RUN [ -f ~/.profile ]                                               \
 WORKDIR /root
 SHELL ["docker-shell"]
 
-RUN fakeroot dnf install -y texinfo cmake bzip2
+RUN fakeroot dnf install -y texinfo cmake bzip2 pkgconfig automake autoconf
 
 RUN spack external find
 
@@ -53,8 +53,8 @@ RUN mkdir /opt/spack-environment \
 &&  (echo "spack:" \
 &&   echo "  specs:" \
 &&   echo "  - mochi-margo ^libfabric@1.13.2 fabrics=rxm,sockets,verbs ^mercury~boostsys ^argobots~valgrind" \
-&&   echo "  - tau ^hwloc~pci" \
-&&   echo "  - apex" \
+&&   echo "  - tau~binutils ^hwloc~pci" \
+&&   echo "  - apex~activeharmony~plugins~binutils" \
 &&   echo "  packages:" \
 &&   echo "    all:" \
 &&   echo "      providers:" \
@@ -97,7 +97,7 @@ RUN cd /opt/spack-environment && \
     spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh
 
 # Bare OS image to run the installed executables
-FROM code.ornl.gov:4567/olcfcontainers/olcfbaseimages/mpiimage-centos-cuda
+FROM mpibase
 
 COPY --from=builder /opt/spack-environment /opt/spack-environment
 COPY --from=builder /opt/software /opt/software

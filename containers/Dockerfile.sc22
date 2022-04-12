@@ -5,7 +5,9 @@ RUN fakeroot dnf install -y \
     pkg-config \
     swig \
     git \
-    cmake
+    cmake \
+    flex \
+    bison
 
 RUN mkdir /dspaces
 RUN cd /dspaces \
@@ -13,14 +15,44 @@ RUN cd /dspaces \
   && cd dspaces \
   && git checkout 1c60e9190cb
 
-RUN ls /etc/profile.d/
-RUN cat /etc/profile.d/z10_spack_environment.sh
-
-RUN ls /sw/peak/spack-envs/base/opt/linux-rhel8-ppc64le/gcc-9.1.0/spectrum-mpi-10.4.0.3-20210112-6jbupg3thjwhsabgevk6xmwhd2bbyxdc/bin
-
 RUN . /etc/profile.d/z10_spack_environment.sh \
   && mkdir /install \
   && mkdir /install/dspaces \
   && mkdir /dspaces/dspaces/build \
   && cd /dspaces/dspaces/build \
-  && cmake /dspaces/dspaces/CMakeLists.txt -DCMAKE_INSTALL_PREFIX=/install/dspaces
+  && cmake .. -DCMAKE_INSTALL_PREFIX=/install/dspaces \
+  && make \
+  && make install
+
+RUN mkdir /ekt \
+  && cd /ekt \
+  && git clone https://github.com/philip-davis/ekt \
+  && cd ekt \
+  && git checkout e46d6d56636 
+ 
+RUN . /etc/profile.d/z10_spack_environment.sh \
+  && mkdir /install/ekt \
+  && mkdir /ekt/ekt/build \
+  && cd /ekt/ekt/build \
+  && cmake .. -DCMAKE_INSTALL_PREFIX=/install/ekt \
+  && make \
+  && make install
+
+RUN mkdir /benesh \
+  && cd /benesh \
+  && git clone https://github.com/philip-davis/benesh.git
+
+
+RUN . /etc/profile.d/z10_spack_environment.sh \
+  && mkdir /install/benesh \
+  && mkdir /benesh/benesh/build \
+  && cd /benesh/benesh/build \
+  && export PATH=${PATH}:/install/dspaces/bin \
+  && export PKG_CONFIG_PATH=$PPKG_CONFIG_PATH}:/install/ekt/lib/pkgconfig:/install/dspaces/lib/pkgconfig \
+  && cmake .. -DCMAKE_INSTALL_PREFIX=/install/benesh \
+  && make \
+  && make install
+
+RUN . /etc/profile.d/z10_spack_environment.sh \
+  && fi_info \
+  && ls /usr/lib64
