@@ -15,12 +15,14 @@ RUN cd /dspaces \
   && cd dspaces \
   && git checkout 1c60e9190cb
 
+RUN echo $PATH
+
 RUN . /etc/profile.d/z10_spack_environment.sh \
   && mkdir /install \
   && mkdir /install/dspaces \
   && mkdir /dspaces/dspaces/build \
   && cd /dspaces/dspaces/build \
-  && cmake .. -DCMAKE_INSTALL_PREFIX=/install/dspaces \
+  && cmake .. -DCMAKE_INSTALL_PREFIX=/install/dspaces -DENABLE_TESTS=True -DCMAKE_C_COMPILER=mpicc -DCMAKE_Fortran_COMPILER=mpifort \
   && make \
   && make install
 
@@ -42,7 +44,6 @@ RUN mkdir /benesh \
   && cd /benesh \
   && git clone https://github.com/philip-davis/benesh.git
 
-
 RUN . /etc/profile.d/z10_spack_environment.sh \
   && mkdir /install/benesh \
   && mkdir /benesh/benesh/build \
@@ -54,5 +55,7 @@ RUN . /etc/profile.d/z10_spack_environment.sh \
   && make install
 
 RUN . /etc/profile.d/z10_spack_environment.sh \
-  && fi_info \
-  && ls /usr/lib64
+  && which fi_info \
+  && ls /install \
+  && ls /install/dspaces \
+  && ls /install/dspaces/bin

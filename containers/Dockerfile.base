@@ -1,4 +1,4 @@
-FROM mpibase as bootstrap
+FROM code.ornl.gov:4567/olcfcontainers/olcfbaseimages/mpiimage-centos-cuda:latest as bootstrap
 
 ENV SPACK_ROOT=/opt/spack \
     CURRENTLY_BUILDING_DOCKER_IMAGE=1 \
@@ -7,7 +7,7 @@ ENV SPACK_ROOT=/opt/spack \
 RUN fakeroot dnf install -y patch
 
 RUN mkdir $SPACK_ROOT && cd $SPACK_ROOT && \
-    git clone https://github.com/spack/spack.git . && git checkout v0.17.1  && \
+i    git clone https://github.com/spack/spack.git .  && \
     mkdir -p $SPACK_ROOT/opt/spack
 
 RUN ln -s $SPACK_ROOT/share/spack/docker/entrypoint.bash \
@@ -33,7 +33,7 @@ RUN [ -f ~/.profile ]                                               \
 WORKDIR /root
 SHELL ["docker-shell"]
 
-RUN fakeroot dnf install -y texinfo cmake bzip2 pkgconfig automake autoconf
+RUN fakeroot dnf install -y texinfo cmake bzip2 pkgconfig automake autoconf gettext diffutils libxml2-devel gettext ncurses
 
 RUN spack external find
 
@@ -46,7 +46,6 @@ CMD ["interactive-shell"]
 # Build stage with Spack pre-installed and ready to be used
 FROM bootstrap as builder
 
-
 # What we want to install and how we want to install it
 # is specified in a manifest file (spack.yaml)
 RUN mkdir /opt/spack-environment \
@@ -54,7 +53,7 @@ RUN mkdir /opt/spack-environment \
 &&   echo "  specs:" \
 &&   echo "  - mochi-margo ^libfabric@1.13.2 fabrics=rxm,sockets,verbs ^mercury~boostsys ^argobots~valgrind" \
 &&   echo "  - tau~binutils ^hwloc~pci" \
-&&   echo "  - apex~activeharmony~plugins~binutils" \
+&&   echo "  - apex@develop~activeharmony~plugins" \
 &&   echo "  packages:" \
 &&   echo "    all:" \
 &&   echo "      providers:" \
@@ -67,6 +66,11 @@ RUN mkdir /opt/spack-environment \
 &&   echo "      externals:" \
 &&   echo "      - spec: spectrum-mpi@10.4.0.3.2%gcc" \
 &&   echo "        prefix: /sw/summit/spack-envs/base/opt/linux-rhel8-ppc64le/gcc-9.1.0/spectrum-mpi-10.4.0.3-20210112-6jbupg3thjwhsabgevk6xmwhd2bbyxdc" \
+# &&   echo "    binutils:" \
+# &&   echo "      buildable: false" \
+# &&   echo "      externals:" \
+# &&   echo "      - prefix: /usr" \
+# &&   echo "        spec: binutils@2.38" \
 &&   echo "    cmake:" \
 &&   echo "      buildable: false" \
 &&   echo "    rdma-core:" \
@@ -86,18 +90,18 @@ RUN cd /opt/spack-environment && \
     spack gc -y
 
 # Strip all the binaries
-RUN find -L /opt/view/* -type f -exec readlink -f '{}' \; | \
-    xargs file -i | \
-    grep 'charset=binary' | \
-    grep 'x-executable\|x-archive\|x-sharedlib' | \
-    awk -F: '{print $1}' | xargs strip -s
+#RUN find -L /opt/view/* -type f -exec readlink -f '{}' \; | \
+#    xargs file -i | \
+#    grep 'charset=binary' | \
+#    grep 'x-executable\|x-archive\|x-sharedlib' | \
+#    awk -F: '{print $1}' | xargs strip -s
 
 # Modifications to the environment that are necessary to run
 RUN cd /opt/spack-environment && \
     spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh
 
 # Bare OS image to run the installed executables
-FROM mpibase
+FROM code.ornl.gov:4567/olcfcontainers/olcfbaseimages/mpiimage-centos-cuda:latest
 
 COPY --from=builder /opt/spack-environment /opt/spack-environment
 COPY --from=builder /opt/software /opt/software
