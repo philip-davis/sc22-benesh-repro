@@ -9,4 +9,4 @@ module purge
 module load DefApps
 module load gcc/9.1.0
 module -t list
-singularity build --disable-cache sc22.sif docker://docker.io/philipdavis/sc22
+singularity build --disable-cache ../containers/sc22.sif docker://docker.io/philipdavis/sc22
