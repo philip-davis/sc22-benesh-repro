@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/bash -ex
 #BSUB -P fus123
 #BSUB -J benesh-sc22-repro
 #BSUB -o benesh-sc22.o%J
-#BSUB -W 150
-#BSUB -nnodes 288
+#BSUB -W 40
+#BSUB -nnodes 5
 #BSUB -q batch
 
 pwd
@@ -32,11 +32,11 @@ source /gpfs/alpine/stf007/world-shared/containers/utils/requiredmpilibs.source
 
 for method in async lockstep ; do
     for scaling in strong weak ; do
-        for size in 64 256 1024 4096; do
-            mkdir -p ${REPRO_DIR}/run/${method}/${scaling}
-            cd ${REPRO_DIR}/run/${method}/${scaling}
+        for size in 64 ; do
+            mkdir -p ${REPRO_DIR}/runtest/${method}/${scaling}
+            cd ${REPRO_DIR}/runtest/${method}/${scaling}
             echo "doing $scaling $method test of size $size"
-            ${REPRO_DIR}/scripts/run.sh $size $method $scaling
+            ${REPRO_DIR}/scripts/run-test.sh $size $method $scaling
         done
     done
 done
