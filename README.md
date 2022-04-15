@@ -6,7 +6,7 @@ The experiments for this paper were run on Summit at OLCF. We have created a con
 To perform the reproduction, the container must be generated, the experiments run and results generated.
 
 The Dockerfiles used to create the container are found in the `containers/` directory of this repo. These can be used to modify the reproduction container following the instructions at:
-[https://docs.olcf.ornl.gov/software/containers_on_summit.html]
+https://docs.olcf.ornl.gov/software/containers_on_summit.html
 
 It should not be necessary to modify or use the Dockerfiles, and further documentation on how to use them on Summit is not included here.
 
