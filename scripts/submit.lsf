@@ -32,7 +32,7 @@ source /gpfs/alpine/stf007/world-shared/containers/utils/requiredmpilibs.source
 
 for method in async lockstep ; do
     for scaling in strong weak ; do
-        for size in 64 256 1024 4096; do
+        for size in 64 256 1024 4096 ; do
             mkdir -p ${REPRO_DIR}/run/${method}/${scaling}
             cd ${REPRO_DIR}/run/${method}/${scaling}
             echo "doing $scaling $method test of size $size"
