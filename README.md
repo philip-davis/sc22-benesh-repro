@@ -12,7 +12,7 @@ It should not be necessary to modify or use the Dockerfiles, and further documen
 
 0. Clone this repository to somewhere on the Spectrum Scale file system (e.g. $MEMBERWORK)
 
-'git clone https://github.com/philip-davis/sc22-benesh-repro.git`
+`git clone https://github.com/philip-davis/sc22-benesh-repro.git`
 
 1. Generating the Container
 
