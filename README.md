@@ -46,3 +46,12 @@ The number of nodes requested on line 6 should be sufficient for the largest sca
 | 4096 | 288 | 
 
 The result of the job script will be a directory tree under `run/`, containing the results of the experiments. Each set of trials will be in the directory `run/<method>/<scaling_type>/<process scale>`. There will be a separate directory with APEX timing data for each component.
+
+### Generate results
+This requires two steps. The first is to collect results from the output of the experiments. This is done using the `scripts/collect_results.sh` script. This should be run on the login node of Summit (not as a job script) Line 8 of the script needs to be updated with the root directory of the repo. The script should be run from the root directory of the repo:
+
+`scripts/collect_results.sh`
+
+The script may take a significant amount of time to run, as it must unzip a trace file for each rank of each trial of each experiment. The script's output to the terminal is just for status monitoring - it can be disregarded. The script creates and populates a `results/` directory, that contins csvs of the traces and timers of each component of each experiment.
+
+These csvs are input for the second step, which is to create data points and graphs. 
