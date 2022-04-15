@@ -10,11 +10,12 @@ https://docs.olcf.ornl.gov/software/containers_on_summit.html
 
 It should not be necessary to modify or use the Dockerfiles, and further documentation on how to use them on Summit is not included here.
 
-0. Clone this repository to somewhere on the Spectrum Scale file system (e.g. $MEMBERWORK)
+### 0. Clone this repository 
+It must be cloned to somewhere on the Spectrum Scale file system (e.g. within $MEMBERWORK)
 
 `git clone https://github.com/philip-davis/sc22-benesh-repro.git`
 
-1. Generating the Container
+### 1. Generate the container
 
 The container is hosted on Docker Hub, but must be converted to a Singularity container to run on Summit. This generally does not work on the login nodes of Summit (possibly due to cgroups limitations) so it has to be done inside a job. It takes a single node about 10-15 minutes. There is a job-script in the `scripts/` directory to do this, called `build-container.lsf`. In order to run the job script, the project must be changed to one that your user is a member of, but replacing `fus123` in the first line with your project ID.
 
@@ -27,11 +28,15 @@ bsub build-container.lsf
 
 This will create the sc22.sif container file in the `containers/` subdirectory.
 
-2. Running the experiments.
+### 2. Run the experiments.
 
-There is a job script, `scripts/submit.lsf`, which runs all experiments from the paper. In order to run, the REPRO_DIR variable on line 23 needs to be set to the repo directory (wherever the repo was cloned - again, should be on the Summit Scale file system). Additionally, the second line of the script must be updated to the project being used for evaluation.
+There is a job script, `scripts/submit.lsf`, which runs all experiments from the paper. In order to run, the REPRO_DIR variable on line 23 needs to be set to the repo directory (wherever the repo was cloned - again, should be on the Summit Scale file system). Additionally, the second line of the script must be updated to the project being used for evaluation. The script can be run from the repo root with:
 
-The experiments run will be a cross-product of {async, lockstep} method x {strong, weak} scaling x {64, 256, 1024, 4096} processes per component, with 5 trials each for a total of 16 different experiments each run 5 times. If run 'as is', the script will request 288 nodes for 2.5 hours. However, not all experiments use all 288 nodes, so some core hours will be wasted. To avoid this (and to verify functionality before committing to a larger run), lines 5, 6, and 35 can be adjusted to run the experiments in segments, if desired.
+`bsub scripts/submit.lsf`
+
+The experiments run will be a cross-product of {async, lockstep} method x {strong, weak} scaling x {64, 256, 1024, 4096} processes per component, with 5 trials each for a total of 16 different experiments each run 5 times. If run 'as is', the script will request 288 nodes for 2.5 hours. However, not all experiments will use all 288 nodes, so some core hours will be wasted. To avoid this (or to verify functionality before committing to a larger run), lines 5, 6, and 35 can be adjusted to run the experiments in segments, if desired.
+
+The number of nodes requested on line 6 should be sufficient for the largest scale being run on line 35. Below is a table of the number of nodes required to run each process scale. A reasonable approach might be to start with teh 64 process scale to verify functionality, then do the 256 and 1024 process scale together, then do the 4096 process scale.
 
 | Process Scale | Node Count |
 | ----------- | ----------- |
@@ -39,3 +44,5 @@ The experiments run will be a cross-product of {async, lockstep} method x {stron
 | 256 | 18 |
 | 1024 | 72 |
 | 4096 | 288 | 
+
+The result of the job script will be a directory tree under `run/`, containing the results of the experiments. Each set of trials will be in the directory `run/<method>/<scaling_type>/<process scale>`. There will be a separate directory with APEX timing data for each component.
